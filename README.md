@@ -8,3 +8,10 @@
 
 ### Reduce
 
+
+## TODO
+
+- Documentation
+- Major refactoring
+- Use multiprocessing?
+- Make decorators?
