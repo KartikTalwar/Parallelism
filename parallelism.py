@@ -5,27 +5,47 @@ import Queue
 import threading
 
 
-class Parallelism(object):
+class Parallelism(threading.Thread):
 
-  def __init__(self, **kwargs):
-    self.arguments = kwargs
-
-
-  def map(self, function, arguments, threads):
-    return None
-
-
-  def filter(self, function, arguments, threads):
-    return None
+  def __init__(self, queue, function, output):
+    threading.Thread.__init__(self)
+    self.queue    = queue
+    self.function = function
+    self.output   = output
 
 
-  def reduce(self, function, arguments, threads):
-    return None
+  def run(self):
+    while True:
+      task = self.queue.get()
+      self.output.append(self.function(task))
+      self.queue.task_done()
 
 
-  def worker(self):
-    return None
 
 
-  def process(self):
-    return None
+def map(function, arguments, threads=10):
+  queue = Queue.Queue()
+  data  = []
+
+  for i in range(threads):
+    task = Parallelism(queue, function, data)
+    task.setDaemon(True)
+    task.start()
+
+  for j in arguments:
+    queue.put(j)
+
+  queue.join()
+
+  return data
+
+
+def filter(function, arguments, threads=10):
+  return None
+
+
+def reduce(function, arguments, threads=10):
+  return None
+
+
+

@@ -5,27 +5,37 @@ import threading
 
 class Worker(threading.Thread):
 
-  def __init__(self, queue):
+  def __init__(self, queue, function):
     threading.Thread.__init__(self)
     self.queue = queue
+    self.function = function
 
 
   def run(self):
     while True:
       task = self.queue.get()
-      print task
+      print self.function(task)
       self.queue.task_done()
 
 
-queue = Queue.Queue()
-for i in range(5):
-  t = Worker(queue)
-  t.setDaemon(True)
-  t.start()
+def map(function, args, threads):
+  queue = Queue.Queue()
+  data = []
 
-for j in range(5):
-  queue.put(j)
+  for i in range(threads):
+    t = Worker(queue, function)
+    t.setDaemon(True)
+    t.start()
 
-queue.join()
+  for j in args:
+    queue.put(j)
+
+  queue.join()
+
+
+def cube(x):
+  return x*x*x
+
+print map(cube, [3, 6, 8], 5)
 
 
