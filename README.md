@@ -1,16 +1,16 @@
-# Parallelism - Parallel Processing for Python
+# Parallelize - Parallel Processing for Python
 
 ## Methods
 
 ### Map
 
 ```python
-import parallelism
+import parallelize
 
 def cube(x):
   return x*x*x
 
-print parallelism.map(cube, [100, 999, 12321])
+print parallize.map(cube, [100, 999, 12321])
 ```
 
 

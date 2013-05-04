@@ -5,7 +5,7 @@ import Queue
 import threading
 
 
-class Parallelism(threading.Thread):
+class Parallelize(threading.Thread):
 
   def __init__(self, queue, function, output):
     threading.Thread.__init__(self)
@@ -28,7 +28,7 @@ def map(function, arguments, threads=10):
   data  = []
 
   for i in range(threads):
-    task = Parallelism(queue, function, data)
+    task = Parallelize(queue, function, data)
     task.setDaemon(True)
     task.start()
 
