@@ -10,7 +10,7 @@ import parallelize
 def cube(x):
   return x*x*x
 
-print parallize.map(cube, [100, 999, 12321])
+print parallelize.map(cube, [100, 999, 12321])
 ```
 
 
