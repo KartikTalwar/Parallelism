@@ -5,21 +5,49 @@ import Queue
 import threading
 
 
-class Parallelize(threading.Thread):
+class Parallelize(object):
 
-  def __init__(self, queue, function, output):
-    threading.Thread.__init__(self)
-    self.queue    = queue
-    self.function = function
-    self.output   = output
+  def __init__(self, output, concurrent=1):
+    self.concurrent = concurrent
+    self.queue   = Queue.Queue()
+    self.threads = []
+    self.output  = output
 
 
-  def run(self):
+  def spawn(self):
+    t = threading.Thread(target=self.compute, args=[self])
+    t.setDaemon(True)
+    t.start()
+    self.threads.append(t)
+
+
+  def compute(self, *args):
     while True:
       task = self.queue.get()
-      self.output.append(self.function(task))
-      self.queue.task_done()
+      function, arguments = task
+      print function(arguments)
+      #self.output.append(function(arguments))
 
+
+  def add(self, function, arguments):
+    self.queue.put((function, arguments))
+
+
+  def start(self):
+    self.spawn()
+
+    while len(self.threads) is not 0:
+      temp = []
+
+      for task in self.threads:
+        if task.is_alive():
+          temp.append(task.join(1) or task)
+
+      print self.threads
+
+      self.threads = temp
+      if not self.queue.empty():
+        self.spawn()
 
 
 
@@ -27,15 +55,12 @@ def map(function, arguments, threads=10):
   queue = Queue.Queue()
   data  = []
 
-  for i in range(threads):
-    task = Parallelize(queue, function, data)
-    task.setDaemon(True)
-    task.start()
+  worker = Parallelize(10, data)
 
-  for j in arguments:
-    queue.put(j)
+  for i in arguments:
+    worker.add(function, i)
 
-  queue.join()
+  worker.start()
 
   return data
 
