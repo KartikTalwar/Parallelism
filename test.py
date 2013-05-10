@@ -3,4 +3,6 @@ import parallelize
 def cube(x):
     return x*x*x
 
-print parallelize.map(cube, [500, 9999, 123454321], 3)
+args = [9345945, 494945884, 438584859505, 9494954] * 1000000
+
+print parallelize.map(cube, args, 3)
