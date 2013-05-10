@@ -7,9 +7,10 @@ import threading
 
 class Parallelize(object):
 
-  def __init__(self, output, threads):
+  def __init__(self, output, threads, ftype='map'):
     self.queue   = Queue.Queue()
     self.threads = []
+    self.ftype   = ftype
     self.output  = output
     self.alive   = True
 
@@ -25,8 +26,16 @@ class Parallelize(object):
     while not self.queue.empty() and self.alive:
       task = self.queue.get()
       function, arguments = task
+      evaluate = function(arguments)
+
+      if self.ftype == 'filter':
+        if evaluate:
+          self.output.append(evaluate)
+      else:
+        self.output.append(evaluate)
+
+
       self.queue.task_done()
-      self.output.append(function(arguments))
 
 
   def add(self, function, arguments):
@@ -65,7 +74,15 @@ def map(function, arguments, threads=10):
 
 
 def filter(function, arguments, threads=10):
-  return None
+  output = []
+  worker = Parallelize(output, threads, ftype='filter')
+
+  for i in arguments:
+    worker.add(function, i)
+
+  worker.start()
+
+  return output
 
 
 def reduce(function, arguments, threads=10):
