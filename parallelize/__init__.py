@@ -7,8 +7,7 @@ import threading
 
 class Parallelize(object):
 
-  def __init__(self, output, concurrent=1):
-    self.concurrent = concurrent
+  def __init__(self, output, threads):
     self.queue   = Queue.Queue()
     self.threads = []
     self.output  = output
@@ -22,11 +21,11 @@ class Parallelize(object):
 
 
   def compute(self, *args):
-    while True:
+    while not self.queue.empty():
       task = self.queue.get()
       function, arguments = task
-      print function(arguments)
-      #self.output.append(function(arguments))
+      self.queue.task_done()
+      self.output.append(function(arguments))
 
 
   def add(self, function, arguments):
@@ -36,14 +35,12 @@ class Parallelize(object):
   def start(self):
     self.spawn()
 
-    while len(self.threads) is not 0:
+    while len(self.threads):
       temp = []
 
       for task in self.threads:
         if task.is_alive():
           temp.append(task.join(1) or task)
-
-      print self.threads
 
       self.threads = temp
       if not self.queue.empty():
@@ -51,11 +48,11 @@ class Parallelize(object):
 
 
 
-def map(function, arguments, threads=10):
+def map(function, arguments, threads=3):
   queue = Queue.Queue()
   data  = []
 
-  worker = Parallelize(10, data)
+  worker = Parallelize(data, threads)
 
   for i in arguments:
     worker.add(function, i)
